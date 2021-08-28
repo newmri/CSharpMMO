@@ -1,0 +1,11 @@
+C:\Users\newmr\Desktop\Study\C#MMO\Server\Server\bin\Debug\Server.exe.config
+C:\Users\newmr\Desktop\Study\C#MMO\Server\Server\bin\Debug\Server.exe
+C:\Users\newmr\Desktop\Study\C#MMO\Server\Server\bin\Debug\Server.pdb
+C:\Users\newmr\Desktop\Study\C#MMO\Server\Server\bin\Debug\ServerCore.dll
+C:\Users\newmr\Desktop\Study\C#MMO\Server\Server\bin\Debug\ServerCore.pdb
+C:\Users\newmr\Desktop\Study\C#MMO\Server\Server\bin\Debug\ServerCore.dll.config
+C:\Users\newmr\Desktop\Study\C#MMO\Server\Server\obj\Debug\Server.csprojAssemblyReference.cache
+C:\Users\newmr\Desktop\Study\C#MMO\Server\Server\obj\Debug\Server.csproj.CoreCompileInputs.cache
+C:\Users\newmr\Desktop\Study\C#MMO\Server\Server\obj\Debug\Server.csproj.CopyComplete
+C:\Users\newmr\Desktop\Study\C#MMO\Server\Server\obj\Debug\Server.exe
+C:\Users\newmr\Desktop\Study\C#MMO\Server\Server\obj\Debug\Server.pdb

@@ -8,15 +8,15 @@ using System.Threading.Tasks;
 
 namespace ServerCore
 {
-    class Listener
+    public class Listener
     {
-        public void Init(IPEndPoint endPoint, Action<Socket> onAcceptHandler)
+        public void Init(IPEndPoint endPoint, Func<Session> sessionFactory)
         {
             _listenSocket = new Socket(endPoint.AddressFamily, SocketType.Stream, ProtocolType.Tcp);
             _listenSocket.Bind(endPoint);
             _listenSocket.Listen(10);
 
-            _onAcceptHandler += onAcceptHandler;
+            _sessionFactory += sessionFactory;
 
             SocketAsyncEventArgs args = new SocketAsyncEventArgs();
             args.Completed += new EventHandler<SocketAsyncEventArgs>(OnAcceptCompleted);
@@ -36,7 +36,9 @@ namespace ServerCore
         {
             if (SocketError.Success == args.SocketError)
             {
-                _onAcceptHandler.Invoke(args.AcceptSocket);
+                Session session = _sessionFactory.Invoke();
+                session.Start(args.AcceptSocket);
+                session.OnConnected(args.AcceptSocket.RemoteEndPoint);
             }
             else
                 Console.WriteLine(args.SocketError.ToString());
@@ -45,6 +47,6 @@ namespace ServerCore
         }
 
         Socket _listenSocket;
-        Action<Socket> _onAcceptHandler;
+        Func<Session> _sessionFactory;
     }
 }
