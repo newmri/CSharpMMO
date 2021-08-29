@@ -14,7 +14,10 @@ namespace DummyClient
         {
             for (int i = 0; i < 5; ++i)
             {
-                byte[] sendBuff = Encoding.UTF8.GetBytes($"Hello World! {i}");
+                ArraySegment<byte> openSegment = SendBufferHelper.Open(4096);
+                byte[] buffer = Encoding.UTF8.GetBytes($"Hello World! {i}");
+                Array.Copy(buffer, 0, openSegment.Array, openSegment.Offset, buffer.Length);
+                ArraySegment<byte> sendBuff = SendBufferHelper.Close(buffer.Length);
                 Send(sendBuff);
             }
 
