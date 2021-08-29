@@ -1,7 +1,0 @@
-C:\Users\newmr\Desktop\Study\C#MMO\Server\ServerCore\bin\Debug\ServerCore.pdb
-C:\Users\newmr\Desktop\Study\C#MMO\Server\ServerCore\obj\Debug\ServerCore.csprojAssemblyReference.cache
-C:\Users\newmr\Desktop\Study\C#MMO\Server\ServerCore\obj\Debug\ServerCore.csproj.CoreCompileInputs.cache
-C:\Users\newmr\Desktop\Study\C#MMO\Server\ServerCore\obj\Debug\ServerCore.pdb
-C:\Users\newmr\Desktop\Study\C#MMO\Server\ServerCore\bin\Debug\ServerCore.dll.config
-C:\Users\newmr\Desktop\Study\C#MMO\Server\ServerCore\bin\Debug\ServerCore.dll
-C:\Users\newmr\Desktop\Study\C#MMO\Server\ServerCore\obj\Debug\ServerCore.dll

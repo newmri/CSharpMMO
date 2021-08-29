@@ -16,7 +16,7 @@ namespace ServerCore
 
         public abstract void OnSend(int numOfBytes);
 
-        public abstract void OnRecv(ArraySegment<byte> buffer);
+        public abstract int OnRecv(ArraySegment<byte> buffer);
 
         public void Start(Socket socket)
         {
@@ -24,11 +24,9 @@ namespace ServerCore
             _isConnected = 1;
 
             _recvArgs.Completed += new EventHandler<SocketAsyncEventArgs>(OnRecvCompleted);
-            _recvArgs.SetBuffer(new byte[1024], 0, 1024);
+            _sendArgs.Completed += new EventHandler<SocketAsyncEventArgs>(OnSendCompleted);
 
             RegisterRecv();
-
-            _sendArgs.Completed += new EventHandler<SocketAsyncEventArgs>(OnSendCompleted);
         }
 
         public void Send(byte[] sendBuff)
@@ -92,6 +90,10 @@ namespace ServerCore
 
         void RegisterRecv()
         {
+            _recvBuffer.Clean();
+            ArraySegment<byte> segment = _recvBuffer.WriteSegment;
+            _recvArgs.SetBuffer(segment.Array, segment.Offset, segment.Count);
+
             bool pending = _socket.ReceiveAsync(_recvArgs);
             if (!pending)
                 OnRecvCompleted(null, _recvArgs);
@@ -103,7 +105,25 @@ namespace ServerCore
             {
                 try
                 {
-                    OnRecv(new ArraySegment<byte>(args.Buffer, args.Offset, args.BytesTransferred));
+                    if (!_recvBuffer.OnWrite(args.BytesTransferred))
+                    {
+                        Disconnect();
+                        return;
+                    }
+
+                    int processLen = OnRecv(_recvBuffer.ReadSegment);
+                    if (processLen < 0 || _recvBuffer.DataSize < processLen)
+                    {
+                        Disconnect();
+                        return;
+                    }
+
+                    if (!_recvBuffer.OnRead(processLen))
+                    {
+                        Disconnect();
+                        return;
+                    }
+
                     RegisterRecv();
                 }
                 catch (Exception e)
@@ -118,6 +138,7 @@ namespace ServerCore
         }
 
         SocketAsyncEventArgs _recvArgs = new SocketAsyncEventArgs();
+        RecvBuffer _recvBuffer = new RecvBuffer(1024);
 
         public void Disconnect()
         {
