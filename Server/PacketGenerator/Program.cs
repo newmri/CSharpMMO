@@ -8,13 +8,18 @@ namespace PacketGenerator
     {
         static void Main(string[] args)
         {
+            string path = "../PDL.xml";
+
             XmlReaderSettings settings = new XmlReaderSettings()
             {
                 IgnoreComments = true,
                 IgnoreWhitespace = true
             };
 
-            using (XmlReader reader = XmlReader.Create("PDL.xml", settings))
+            if (args.Length >= 1)
+                path = args[0];
+
+            using (XmlReader reader = XmlReader.Create(path, settings))
             {
                 reader.MoveToContent();
 
@@ -24,11 +29,23 @@ namespace PacketGenerator
                         ParsePacket(reader);
                 }
 
-                File.WriteAllText("GenPackets.cs", genPackets);
+                string fileText = string.Format(PacketFormat.fileFormat, packetEnums, genPackets);
+                File.WriteAllText("GenPackets.cs", fileText);
+
+                string clientToGameServerManagerText = string.Format(PacketFormat.managerFormat, clientToGameServerRegister);
+                File.WriteAllText("ClientToGameServerPacketManager.cs", clientToGameServerManagerText);
+
+                string gameServerToClientManagerText = string.Format(PacketFormat.managerFormat, gameServerToClientRegister);
+                File.WriteAllText("GameServerToClientPacketManager.cs", gameServerToClientManagerText);
             }
         }
 
         static string genPackets;
+        static ushort packetID;
+        static string packetEnums;
+
+        static string clientToGameServerRegister;
+        static string gameServerToClientRegister;
 
         public static void ParsePacket(XmlReader reader)
         {
@@ -50,6 +67,19 @@ namespace PacketGenerator
 
             Tuple<string, string, string> tuple = ParseMembers(reader);
             genPackets += string.Format(PacketFormat.packetFormat, packetName, tuple.Item1, tuple.Item2, tuple.Item3);
+            packetEnums += string.Format(PacketFormat.packetEnumFormat, packetName, ++packetID) + Environment.NewLine + "\t";
+
+            string tag = packetName.Substring(0, packetName.IndexOf("_"));
+
+            switch (tag)
+            {
+                case "CGS":
+                    clientToGameServerRegister += string.Format(PacketFormat.managerRegisterFormat, packetName) + Environment.NewLine;
+                    break;
+                case "GC":
+                    gameServerToClientRegister += string.Format(PacketFormat.managerRegisterFormat, packetName) + Environment.NewLine;
+                    break;
+            }
         }
 
         public static Tuple<string, string, string> ParseMembers(XmlReader reader)
@@ -85,6 +115,12 @@ namespace PacketGenerator
                 string memberType = reader.Name.ToLower();
                 switch (memberType)
                 {
+                    case "byte":
+                    case "sbyte":
+                        memberCode += string.Format(PacketFormat.memberFormat, memberType, memberName);
+                        readCode += string.Format(PacketFormat.readByteFormat, memberName, memberType);
+                        writeCode += string.Format(PacketFormat.writeByteFormat, memberName, memberType);
+                        break;
                     case "bool":
                     case "short":
                     case "ushort":
@@ -133,7 +169,7 @@ namespace PacketGenerator
 
             string memberCode = string.Format(PacketFormat.memberListFormat, FirstCharToUpper(listName), FirstCharToLower(listName), tuple.Item1, tuple.Item2, tuple.Item3);
             string readCode = string.Format(PacketFormat.readListFormat, FirstCharToUpper(listName), FirstCharToLower(listName));
-            string writeCode = string.Format(PacketFormat.readListFormat, FirstCharToUpper(listName), FirstCharToLower(listName));
+            string writeCode = string.Format(PacketFormat.writeListFormat, FirstCharToUpper(listName), FirstCharToLower(listName));
 
             return new Tuple<string, string, string>(memberCode, readCode, writeCode);
         }
