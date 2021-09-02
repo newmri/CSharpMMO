@@ -76,7 +76,7 @@ namespace PacketGenerator
                 case "CGS":
                     clientToGameServerRegister += string.Format(PacketFormat.managerRegisterFormat, packetName) + Environment.NewLine;
                     break;
-                case "GC":
+                case "GSC":
                     gameServerToClientRegister += string.Format(PacketFormat.managerRegisterFormat, packetName) + Environment.NewLine;
                     break;
             }

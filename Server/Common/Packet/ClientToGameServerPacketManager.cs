@@ -4,20 +4,15 @@ using System.Collections.Generic;
 
 class PacketManager
 {
-#region Singleton
-public static PacketManager Instance
-{
-    get
+    #region Singleton
+    public static PacketManager Instance { get { return _session; } }
+    static PacketManager _session = new PacketManager();
+    #endregion
+
+    PacketManager()
     {
-        if (null == _instance)
-            _instance = new PacketManager();
-
-        return _instance;
+        Register();
     }
-}
-
-static PacketManager _instance;
-#endregion
 
 public void OnRecvPacket(PacketSession session, ArraySegment<byte> buffer)
 {
@@ -34,8 +29,8 @@ public void OnRecvPacket(PacketSession session, ArraySegment<byte> buffer)
 
 public void Register()
 {
-    _onRecv.Add((ushort)PacketID.CGS_PlayerInfoReq, MakePacket<CGS_PlayerInfoReq>);
-    _handler.Add((ushort)PacketID.CGS_PlayerInfoReq, PacketHandler.CGS_PlayerInfoReqHandler);
+    _onRecv.Add((ushort)PacketID.CGS_Chat, MakePacket<CGS_Chat>);
+    _handler.Add((ushort)PacketID.CGS_Chat, PacketHandler.CGS_ChatHandler);
 
    return;
 }

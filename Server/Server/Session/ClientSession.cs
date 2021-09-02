@@ -13,31 +13,35 @@ namespace Server
     {
         public override void OnConnected(EndPoint endPoint)
         {
-            
-            ArraySegment<byte> openSegment = SendBufferHelper.Open(4096);
-            byte[] buffer = Encoding.UTF8.GetBytes("Welcome to MMORPG Server !");
-            Array.Copy(buffer, 0, openSegment.Array, openSegment.Offset, buffer.Length);
-            ArraySegment<byte> sendBuff = SendBufferHelper.Close(buffer.Length);
-            Send(sendBuff);
 
-            Thread.Sleep(1000);
-            Disconnect();
+            Console.WriteLine($"OnConnected: {endPoint}");
+            Program.Room.Enter(this);
         }
 
-        public override void OnRevPacket(ArraySegment<byte> buffer)
+        public override void OnRecvPacket(ArraySegment<byte> buffer)
         {
             PacketManager.Instance.OnRecvPacket(this, buffer);
         }
 
         public override void OnDisconnected(EndPoint endPoint)
         {
-
+            Console.WriteLine($"OnDisconnected: {endPoint}");
+            
+            SessionManager.Instance.Remove(this);
+            if (null != Room)
+            {
+                Room.Leave(this);
+                Room = null;
+            }
         }
 
         public override void OnSend(int numOfBytes)
         {
-
+            Console.WriteLine($"Sent bytes: {numOfBytes}");
         }
+
+        public int SessionID { get; set; }
+        public GameRoom Room { get; set; }
     }
 
 }

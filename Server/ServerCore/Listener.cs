@@ -14,7 +14,7 @@ namespace ServerCore
         {
             _listenSocket = new Socket(endPoint.AddressFamily, SocketType.Stream, ProtocolType.Tcp);
             _listenSocket.Bind(endPoint);
-            _listenSocket.Listen(10);
+            _listenSocket.Listen(100);
 
             _sessionFactory += sessionFactory;
 

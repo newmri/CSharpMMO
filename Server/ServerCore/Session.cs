@@ -26,7 +26,7 @@ namespace ServerCore
                 if (buffer.Count < dataSize)
                     break;
 
-                OnRevPacket(new ArraySegment<byte>(buffer.Array, buffer.Offset, dataSize));
+                OnRecvPacket(new ArraySegment<byte>(buffer.Array, buffer.Offset, dataSize));
 
                 processLen += dataSize;
 
@@ -36,7 +36,7 @@ namespace ServerCore
             return processLen;
         }
 
-        public abstract void OnRevPacket(ArraySegment<byte> buffer);
+        public abstract void OnRecvPacket(ArraySegment<byte> buffer);
     }
 
     public abstract class Session
