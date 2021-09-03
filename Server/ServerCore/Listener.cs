@@ -10,17 +10,20 @@ namespace ServerCore
 {
     public class Listener
     {
-        public void Init(IPEndPoint endPoint, Func<Session> sessionFactory)
+        public void Init(IPEndPoint endPoint, Func<Session> sessionFactory, int register = 10, int backlog = 300)
         {
             _listenSocket = new Socket(endPoint.AddressFamily, SocketType.Stream, ProtocolType.Tcp);
             _listenSocket.Bind(endPoint);
-            _listenSocket.Listen(100);
+            _listenSocket.Listen(backlog);
 
             _sessionFactory += sessionFactory;
 
-            SocketAsyncEventArgs args = new SocketAsyncEventArgs();
-            args.Completed += new EventHandler<SocketAsyncEventArgs>(OnAcceptCompleted);
-            RegisterAccept(args);
+            for (int i = 0; i < register; ++i)
+            {
+                SocketAsyncEventArgs args = new SocketAsyncEventArgs();
+                args.Completed += new EventHandler<SocketAsyncEventArgs>(OnAcceptCompleted);
+                RegisterAccept(args);
+            }
         }
 
         void RegisterAccept(SocketAsyncEventArgs args)
