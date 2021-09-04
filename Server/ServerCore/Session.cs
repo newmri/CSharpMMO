@@ -16,6 +16,7 @@ namespace ServerCore
         public sealed override int OnRecv(ArraySegment<byte> buffer)
         {
             int processLen = 0;
+            int packetCount = 0;
 
             while (true)
             {
@@ -27,11 +28,15 @@ namespace ServerCore
                     break;
 
                 OnRecvPacket(new ArraySegment<byte>(buffer.Array, buffer.Offset, dataSize));
+                ++packetCount;
 
                 processLen += dataSize;
 
                 buffer = new ArraySegment<byte>(buffer.Array, buffer.Offset + dataSize, buffer.Count - dataSize);
             }
+
+            if (packetCount > 1)
+                Console.WriteLine($"Recv Count : {packetCount}");
 
             return processLen;
         }
@@ -73,6 +78,21 @@ namespace ServerCore
             lock (_lock)
             {
                 _sendQueue.Enqueue(sendBuff);
+                if (0 == _pendingList.Count)
+                    RegisterSend();
+            }
+        }
+
+        public void Send(List<ArraySegment<byte>> sendBuffList)
+        {
+            if (0 == sendBuffList.Count)
+                return;
+
+            lock (_lock)
+            {
+                foreach(ArraySegment<byte> sendBuff in sendBuffList)
+                    _sendQueue.Enqueue(sendBuff);
+
                 if (0 == _pendingList.Count)
                     RegisterSend();
             }
@@ -197,7 +217,7 @@ namespace ServerCore
         }
 
         SocketAsyncEventArgs _recvArgs = new SocketAsyncEventArgs();
-        RecvBuffer _recvBuffer = new RecvBuffer(1024);
+        RecvBuffer _recvBuffer = new RecvBuffer(65535);
 
         public void Disconnect()
         {

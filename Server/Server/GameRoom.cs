@@ -29,9 +29,16 @@ namespace Server
             gscPacket.chat = cgsPacket.chat + $" From {gscPacket.playerID}";
             ArraySegment<byte> segment = gscPacket.Write();
 
+            _pendingList.Add(segment);
+        }
 
+        public void Flush()
+        {
             foreach (ClientSession clientSession in _sessions)
-                clientSession.Send(segment);
+                clientSession.Send(_pendingList);
+
+            Console.WriteLine($"Flushed {_pendingList.Count} items");
+            _pendingList.Clear();
         }
 
         public void Leave(ClientSession session)
@@ -40,5 +47,6 @@ namespace Server
         }
 
         List<ClientSession> _sessions = new List<ClientSession>();
+        List<ArraySegment<byte>> _pendingList = new List<ArraySegment<byte>>();
     }
 }

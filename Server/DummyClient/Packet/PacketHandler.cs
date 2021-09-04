@@ -12,8 +12,5 @@ class PacketHandler
     {
         GSC_Chat gscPacket = packet as GSC_Chat;
         ServerSession serverSession = session as ServerSession;
-
-        Console.WriteLine(gscPacket.chat);
-
     }
 }
