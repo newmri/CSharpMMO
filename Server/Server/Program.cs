@@ -21,12 +21,19 @@ namespace Server
             _listener.Init(endPoint, () => { return SessionManager.Instance.Generate(); });
             Console.WriteLine("Listening....");
 
+            FlushRoom();
+
             while (true)
             {
-                Room.Push(() => Room.Flush());
-                Thread.Sleep(230);
+                JobTimer.Instance.Flush();
             }
 
+        }
+
+        static void FlushRoom()
+        {
+            Room.Push(() => Room.Flush());
+            JobTimer.Instance.Push(FlushRoom, 250);
         }
 
         static Listener _listener = new Listener();
