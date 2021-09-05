@@ -42,6 +42,10 @@ namespace Server
 
         public int SessionID { get; set; }
         public GameRoom Room { get; set; }
+        public float PosX { get; set; }
+        public float PosY { get; set; }
+        public float PosZ { get; set; }
+
     }
 
 }

@@ -27,15 +27,17 @@ namespace DummyClient
             {
                 foreach (ServerSession session in _sessions)
                 {
-                    CGS_Chat cgsPacket = new CGS_Chat();
-                    cgsPacket.chat = $"Hello Server !";
-                    ArraySegment<byte> segment = cgsPacket.Write();
-                    session.Send(segment);
+                    CGS_Move cgsPacket = new CGS_Move();
+                    cgsPacket.posX = _rand.Next(-50, 50);
+                    cgsPacket.posY = 0.0f;
+                    cgsPacket.posZ = _rand.Next(-50, 50);
+                    session.Send(cgsPacket.Write());
                 }
             }
         }
 
         List<ServerSession> _sessions = new List<ServerSession>();
         object _lock = new object();
+        Random _rand = new Random();
     }
 }

@@ -8,16 +8,29 @@ using System.Threading.Tasks;
 
 class PacketHandler
 {
-    public static void CGS_ChatHandler(PacketSession session, IPacket packet)
+    public static void CGS_LeavGameHandler(PacketSession session, IPacket packet)
     {
-        CGS_Chat chatPacket = packet as CGS_Chat;
         ClientSession clientSession = session as ClientSession;
 
         if (null == clientSession.Room)
             return;
 
         GameRoom room = clientSession.Room;
-        room.Push(() => room.Broadcast(clientSession, chatPacket));   
+        room.Push(() => room.Leave(clientSession));   
+    }
+
+    public static void CGS_MoveHandler(PacketSession session, IPacket packet)
+    {
+        CGS_Move movePacket = packet as CGS_Move;
+        ClientSession clientSession = session as ClientSession;
+
+        if (null == clientSession.Room)
+            return;
+
+        //Console.WriteLine($"{movePacket.posX}, {movePacket.posY}, {movePacket.posZ}");
+
+        GameRoom room = clientSession.Room;
+        room.Push(() => room.Move(clientSession, movePacket));
     }
 }
 

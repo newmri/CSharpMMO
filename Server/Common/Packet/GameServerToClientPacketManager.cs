@@ -2,7 +2,7 @@ using ServerCore;
 using System;
 using System.Collections.Generic;
 
-class PacketManager
+public class PacketManager
 {
     #region Singleton
     public static PacketManager Instance { get { return _session; } }
@@ -14,37 +14,54 @@ class PacketManager
         Register();
     }
 
-public void OnRecvPacket(PacketSession session, ArraySegment<byte> buffer)
-{
-    ushort count = 0;
-    ushort size = BitConverter.ToUInt16(buffer.Array, buffer.Offset + count);
-    count += sizeof(ushort);
-    ushort ID = BitConverter.ToUInt16(buffer.Array, buffer.Offset + count);
-    count += sizeof(ushort);
+    public void OnRecvPacket(PacketSession session, ArraySegment<byte> buffer, Action<PacketSession, IPacket> onRecvCallback = null)
+    {
+        ushort count = 0;
+        ushort size = BitConverter.ToUInt16(buffer.Array, buffer.Offset + count);
+        count += sizeof(ushort);
+        ushort ID = BitConverter.ToUInt16(buffer.Array, buffer.Offset + count);
+        count += sizeof(ushort);
 
-    Action<PacketSession, ArraySegment<byte>> action = null;
-    if (_onRecv.TryGetValue(ID, out action))
-        action.Invoke(session, buffer);
-}
+        Func<PacketSession, ArraySegment<byte>, IPacket> func = null;
 
-public void Register()
-{
-    _onRecv.Add((ushort)PacketID.GSC_Chat, MakePacket<GSC_Chat>);
-    _handler.Add((ushort)PacketID.GSC_Chat, PacketHandler.GSC_ChatHandler);
+        if (_makeFunc.TryGetValue(ID, out func))
+        {
+            IPacket packet = func.Invoke(session, buffer);
+            if (null != onRecvCallback)
+                onRecvCallback.Invoke(session, packet);
+            else
+                HandlerPacket(session, packet);
+        }
+    }
 
-   return;
-}
+    public void Register()
+    {
+ _makeFunc.Add((ushort)PacketID.GSC_BroadcastEnterGame, MakePacket<GSC_BroadcastEnterGame>);
+    _handler.Add((ushort)PacketID.GSC_BroadcastEnterGame, PacketHandler.GSC_BroadcastEnterGameHandler);
+ _makeFunc.Add((ushort)PacketID.GSC_BroadcastLeaveGame, MakePacket<GSC_BroadcastLeaveGame>);
+    _handler.Add((ushort)PacketID.GSC_BroadcastLeaveGame, PacketHandler.GSC_BroadcastLeaveGameHandler);
+ _makeFunc.Add((ushort)PacketID.GSC_PlayerList, MakePacket<GSC_PlayerList>);
+    _handler.Add((ushort)PacketID.GSC_PlayerList, PacketHandler.GSC_PlayerListHandler);
+ _makeFunc.Add((ushort)PacketID.GSC_BroadcastMove, MakePacket<GSC_BroadcastMove>);
+    _handler.Add((ushort)PacketID.GSC_BroadcastMove, PacketHandler.GSC_BroadcastMoveHandler);
 
-void MakePacket<T>(PacketSession session, ArraySegment<byte> buffer) where T : IPacket, new()
-{
-    T packet = new T();
-    packet.Read(buffer);
+       return;
+    }
 
-    Action<PacketSession, IPacket> action = null;
-    if (_handler.TryGetValue(packet.Protocol, out action))
-        action.Invoke(session, packet);
-}
+    T MakePacket<T>(PacketSession session, ArraySegment<byte> buffer) where T : IPacket, new()
+    {
+        T packet = new T();
+        packet.Read(buffer);
+        return packet;
+    }
 
-Dictionary<ushort, Action<PacketSession, ArraySegment<byte>>> _onRecv = new Dictionary<ushort, Action<PacketSession, ArraySegment<byte>>>();
-Dictionary<ushort, Action<PacketSession, IPacket>> _handler = new Dictionary<ushort, Action<PacketSession, IPacket>>();
+    public void HandlerPacket(PacketSession session, IPacket packet)
+    {
+        Action<PacketSession, IPacket> action = null;
+        if (_handler.TryGetValue(packet.Protocol, out action))
+            action.Invoke(session, packet);
+    }
+
+    Dictionary<ushort, Func<PacketSession, ArraySegment<byte>, IPacket>> _makeFunc = new Dictionary<ushort, Func<PacketSession, ArraySegment<byte>, IPacket>>();
+    Dictionary<ushort, Action<PacketSession, IPacket>> _handler = new Dictionary<ushort, Action<PacketSession, IPacket>>();
 }
